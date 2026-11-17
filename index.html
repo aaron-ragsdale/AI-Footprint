@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What does AI cost the planet?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#E6EDEC;--panel:#F7FAF9;--ink:#12303A;--mute:#5A727A;--line:#C5D3D1;
+--power:#E0990F;--price:#C23B5A;--co2:#4F5B64;--water:#2C86C9;--land:#5E8F34;--waste:#A9573A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Bricolage Grotesque",system-ui,sans-serif}
+header{padding:28px 20px 8px;max-width:1240px;margin:auto}
+h1{font-size:clamp(28px,4.4vw,52px);line-height:1.02;margin:0 0 8px;font-weight:800;letter-spacing:-.02em}
+header p{margin:0;color:var(--mute);max-width:64ch}
+main{max-width:1240px;margin:auto;padding:16px 20px 40px;display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+aside{display:grid;gap:14px}
+h2{font-size:15px;margin:0 0 6px;font-weight:600}
+.row{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin-top:12px}
+output{font-weight:800}
+input[type=range]{width:100%;accent-color:var(--ink);margin:4px 0 0}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px}
+.seg input{position:absolute;opacity:0}
+.seg span{display:block;text-align:center;padding:7px 4px;border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer;background:#fff}
+.seg input:checked+span{background:var(--ink);color:#fff;border-color:var(--ink)}
+:focus-visible{outline:3px solid var(--water);outline-offset:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+button{font:inherit;font-size:13px;border:1px solid var(--ink);background:#fff;color:var(--ink);border-radius:999px;padding:5px 11px;cursor:pointer}
+button:hover{background:var(--ink);color:#fff}
+button:active{transform:scale(.96)}
+.i{width:20px;height:20px;padding:0;font-size:12px;font-weight:800;line-height:1;margin-left:4px;border-color:var(--mute);color:var(--mute)}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-top:14px}
+.chk input{margin-top:3px}
+.lab-row{border-left:6px solid var(--lc);padding:6px 0 8px 10px;margin-top:8px;border-bottom:1px solid var(--line)}
+.ln{font-size:14px}.lg{font-size:12px;color:var(--mute);margin:2px 0 6px}
+.lb{display:flex;gap:6px;flex-wrap:wrap}
+.lb .tr{background:var(--lc);border-color:var(--lc);color:#fff}
+.note{font-size:12px;color:var(--mute);margin:8px 0 0}
+.act{display:grid;gap:8px;margin-top:8px}
+.act button{border-radius:10px;text-align:left;padding:9px 12px}
+#ledger{font-size:13px;color:var(--mute);margin-top:10px}
+.scene{padding:0;overflow:hidden;border-radius:22px}
+canvas{display:block;width:100%;height:auto}
+.who{margin-top:14px}
+.sr{display:grid;grid-template-columns:70px 1fr 120px;gap:10px;align-items:center;font-size:13px;margin-top:8px}
+.sr b{text-align:right}
+.sb{display:flex;height:16px;border-radius:8px;overflow:hidden;background:#DDE6E4}
+.sb i{display:block;transition:width .4s}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--mute);margin-top:10px}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:6px 16px 6px 16px;padding:14px 16px;cursor:pointer}
+.card:hover{border-color:var(--c)}
+.card h3{margin:0;font-size:14px;font-weight:600;color:var(--c);display:flex;justify-content:space-between}
+.card h3 span{font-weight:400;font-size:12px;color:var(--mute)}
+.big{font-size:clamp(30px,4vw,44px);font-weight:800;line-height:1.05;letter-spacing:-.02em;margin:4px 0}
+.big small{font-size:15px;font-weight:400;color:var(--mute);letter-spacing:0}
+.eq{font-size:14px;color:var(--mute);margin:2px 0}.eq b{color:var(--ink)}
+.bar{height:6px;background:#DDE6E4;border-radius:3px;margin:10px 0 6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c);width:0;transition:width .4s}
+.add{font-size:13px;font-weight:600;color:var(--c);min-height:20px}
+.flash{animation:fl .9s}
+@keyframes fl{0%{background:#FFF2C9}100%{background:var(--panel)}}
+svg.ch{width:100%;height:auto;margin-top:6px}
+dialog{border:none;border-radius:20px;max-width:680px;width:calc(100% - 32px);padding:22px;background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(18,48,58,.35)}
+dialog::backdrop{background:rgba(18,48,58,.5)}
+dialog h2{font-size:22px;font-weight:800;margin:0 0 8px}
+dialog p{margin:8px 0;font-size:15px}
+.how{background:#E6EDEC;border-radius:10px;padding:8px 12px;font-size:13px!important}
+.st4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.st{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.st small{display:block;color:var(--mute);font-size:12px}.st b{font-size:22px;line-height:1.1}.st span{display:block;font-size:12px;color:var(--mute)}
+.out{border-radius:10px;padding:10px 12px;margin:10px 0}
+.out.ok{background:#DCEFD2}.out.bad{background:#F6DDD3}
+.out b{display:block}
+.dact{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.dact .main{background:var(--ink);color:#fff}
+.ctrl{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;align-items:start}
+@media(max-width:700px){.ctrl{grid-template-columns:1fr}}
+#tourBtn{margin-top:14px;background:var(--ink);color:#fff;padding:9px 18px;font-size:14px}
+#tour{position:fixed;inset:0;z-index:50}
+#tour[hidden]{display:none}
+#spot{position:fixed;border-radius:16px;box-shadow:0 0 0 9999px rgba(18,48,58,.66);outline:3px solid #fff;transition:left .25s,top .25s,width .25s,height .25s}
+#tip{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;width:min(540px,calc(100% - 24px));background:var(--panel);border-radius:18px;padding:16px 18px;box-shadow:0 12px 40px rgba(18,48,58,.4)}
+#tip.top{bottom:auto;top:16px}
+#tip h3{margin:0 0 4px;font-size:20px;font-weight:800}
+#tip p{margin:0 0 12px;font-size:15px}
+.tnav{display:flex;align-items:center;gap:8px}
+.tnav span{flex:1;text-align:center;font-size:13px;color:var(--mute)}
+#tnext{background:var(--ink);color:#fff}
+#tip button:disabled{opacity:.35;pointer-events:none}
+.mrow{display:flex;gap:8px;align-items:flex-start;padding:6px 0 6px 8px;border-left:5px solid var(--lc);margin-top:6px;font-size:14px}
+.mrow small{display:block;color:var(--mute);font-size:12px}
+.mrow input{margin-top:4px;accent-color:var(--lc)}
+#mlist{max-height:200px;overflow:auto}
+.tb{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+.tb td,.tb th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}
+.tb th{color:var(--mute);font-weight:600}
+.pb{font-size:14px;font-weight:600;background:var(--lc);color:#fff;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.sw{flex-wrap:wrap}
+.lab-row.off{opacity:.5}
+.lh{display:flex;justify-content:space-between;align-items:center}
+.sw{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600}
+.sw input{width:18px;height:18px;accent-color:var(--lc)}
+.cap{font-size:13px;margin:2px 0 6px}
+.pz{font-size:12px;color:var(--mute);display:flex;justify-content:space-between;align-items:center}
+.pz b{color:var(--ink)}
+.lb button:disabled{opacity:.4;pointer-events:none}
+.rs{position:relative}.tk{position:absolute;top:calc(50% + 2px);width:3px;height:18px;background:#C23B5A;border-radius:2px;transform:translate(-50%,-50%);pointer-events:none;z-index:1}.rg{position:absolute;top:calc(50% + 2px);height:6px;background:#C23B5A;opacity:.45;border-radius:3px;transform:translateY(-50%);pointer-events:none;z-index:1}.nm{flex:1 0 calc(100% - 50px)}
+.fq{font-size:11px;font-weight:400;color:var(--mute)}
+.ft{font-size:11px;font-weight:600;border-radius:999px;padding:1px 7px;white-space:nowrap}.ft.g{background:#DCEFD2}.ft.m{background:#FBEBC2}.ft.b{background:#F6DDD3}
+details{margin-top:12px;font-size:14px}summary{cursor:pointer;font-weight:600}details p,details ul{margin:6px 0}details ul{padding-left:20px}
+@media(prefers-reduced-motion:reduce){.flash{animation:none}.bar i,.sb i{transition:none}}
+</style>
+</head>
+<body>
+<header>
+<h1>What does AI cost the planet?</h1>
+<p>Add AI labs, tweak the grid, run a training job, and see what it takes in power, carbon, water and land. Click any <b>?</b> or any card to go deeper.</p>
+<button id="tourBtn">Take a walkthrough →</button>
+</header>
+<main>
+<aside>
+ <section class="panel">
+  <h2>Add AI labs <button class="i" data-x="labs" aria-label="About labs">?</button></h2>
+  <div id="labs"></div>
+  <p class="note">Differences between labs are illustrative assumptions, not measurements of the real companies.</p>
+ </section>
+ </aside>
+<div>
+ <div class="panel scene"><canvas id="scene" aria-label="Animated scene of data centers coloured by lab, a power plant, cooling tower, wind turbines and a reservoir"></canvas></div>
+ <section class="panel who"><h2>Who adds what</h2><div id="stacks"></div></section>
+ <div class="cards">
+  <div class="card" id="c_power" data-x="power" tabindex="0" role="button" style="--c:var(--power)"><h3>Power <span>Tap for details</span></h3><div class="big"><span data-k="twh"></span> <small>TWh a year</small></div><p class="eq"><b data-k="share"></b>% of all US electricity</p><p class="eq">= <b data-k="reactors"></b> nuclear reactors running nonstop, or <b data-k="homes"></b> homes</p><div class="bar"><i data-k="bar"></i></div><div class="add" data-k="add"></div></div>
+  <div class="card" id="c_price" data-x="price" tabindex="0" role="button" style="--c:var(--price)"><h3>Price of electricity <span>Tap for details</span></h3><div class="big"><span data-k="price"></span> <small>¢ per kWh</small></div><p class="eq">Up <b data-k="up"></b>% from about 18¢ today (US average home price)</p><svg class="ch" viewBox="0 0 200 64" role="img" aria-label="Price rises as AI load grows"><polyline data-k="line" fill="none" stroke="#C23B5A" stroke-width="2"/><circle data-k="dot" r="4.5" fill="#C23B5A"/></svg><div class="add" data-k="add"></div></div>
+  <div class="card" id="c_co2" data-x="co2" tabindex="0" role="button" style="--c:var(--co2)"><h3>Carbon emissions <span>Tap for details</span></h3><div class="big"><span data-k="co2"></span> <small>Mt CO₂ a year</small></div><p class="eq">= <b data-k="cars"></b> cars driven for a year</p><p class="eq">Grid emits <b data-k="inten"></b> g CO₂ per kWh</p><div class="bar"><i data-k="bar"></i></div><div class="add" data-k="add"></div></div>
+  <div class="card" id="c_water" data-x="water" tabindex="0" role="button" style="--c:var(--water)"><h3>Water <span>Tap for details</span></h3><div class="big"><span data-k="water"></span> <small>billion litres a year</small></div><p class="eq">= <b data-k="pools"></b> Olympic pools</p><p class="eq">Uses <b data-k="wl"></b> L per kWh</p><div class="bar"><i data-k="bar"></i></div><div class="add" data-k="add"></div></div>
+  <div class="card" id="c_land" data-x="land" tabindex="0" role="button" style="--c:var(--land)"><h3>Land <span>Tap for details</span></h3><div class="big"><span data-k="land"></span> <small>km²</small></div><p class="eq">= <b data-k="parks"></b> Central Parks of campuses, solar farms and plants</p><div class="bar"><i data-k="bar"></i></div><div class="add" data-k="add"></div></div>
+  <div class="card" id="c_waste" data-x="waste" tabindex="0" role="button" style="--c:var(--waste)"><h3>Chip and server waste <span>Tap for details</span></h3><div class="big"><span data-k="kt"></span> <small>kilotonnes a year</small></div><p class="eq">= <b data-k="eiffel"></b> Eiffel Towers of scrapped hardware</p><p class="eq">Retiring <b data-k="gpus"></b> chips a year</p><div class="bar"><i data-k="bar"></i></div><div class="add" data-k="add"></div></div>
+ </div>
+ <div class="ctrl">
+<section class="panel" id="tunePanel">
+  <h2>Tune the world</h2>
+  <div class="row"><label for="eff">Efficiency gains<button class="i" data-x="eff" aria-label="About efficiency">?</button></label><output id="o_eff"></output></div>
+  <input id="eff" type="range" min="0" max="60" value="0">
+  <div class="row"><label for="life">Chip lifespan<button class="i" data-x="life" aria-label="About chip lifespan">?</button></label><output id="o_life"></output></div>
+  <input id="life" type="range" min="1" max="8" value="4">
+  <div class="row"><label for="ren">Clean energy share<button class="i" data-x="ren" aria-label="About clean energy">?</button></label><output id="o_ren"></output></div>
+  <input id="ren" type="range" min="0" max="100" value="40">
+  <div class="chips"><button data-ren="10">Coal &amp; gas heavy</button><button data-ren="40">Today's mix</button><button data-ren="90">Mostly clean</button></div>
+  <div class="row">Cooling method<button class="i" data-x="cool" aria-label="About cooling">?</button></div>
+  <div class="seg" role="radiogroup" aria-label="Cooling method">
+   <label><input type="radio" name="cool" value="evap"><span>Evaporative towers</span></label>
+   <label><input type="radio" name="cool" value="closed" checked><span>Typical mix</span></label>
+   <label><input type="radio" name="cool" value="dry"><span>Dry or immersion</span></label>
+  </div>
+  <div class="chk"><input id="ind" type="checkbox" checked><label for="ind">Count water and land used by power plants</label><button class="i" data-x="ind" aria-label="About power plant impacts">?</button></div>
+ </section>
+ <section class="panel" id="usePanel">
+  <h2>Everyday use <button class="i" data-x="use" aria-label="About everyday use">?</button></h2>
+  <p class="note" style="margin-top:0">Tick the models you trained, then run a task on them.</p>
+  <div id="mlist"></div>
+  <div class="act"><button data-r="chat">Answer 1 billion chats</button><button data-r="docs">Write 1 million documents</button><button data-r="learn">Create 1 million learning packs</button><button data-r="video">Generate 1 million videos</button></div>
+  <div id="ledger" aria-live="polite"></div>
+  <button id="reset" style="margin-top:8px">Clear runs and models</button>
+ </section>
+<section class="panel" id="qualPanel" style="grid-column:1/-1"><h2>Quality vs size <button class="i" data-x="qual" aria-label="About quality">?</button></h2><div id="qchart"></div></section>
+</div>
+ <p class="note" style="margin-top:16px;max-width:90ch">Simplified, illustrative estimates for building intuition, not forecasts. Click any <b>?</b> or card to see the assumptions behind each number. Background figures draw on IEA and Lawrence Berkeley National Lab data-center reports, Patterson et al. 2021, and Li et al. "Making AI Less Thirsty".</p>
+</div>
+</main>
+<div id="tour" hidden><div id="spot"></div><div id="tip" role="dialog" aria-label="Walkthrough" aria-live="polite"><h3 id="tt"></h3><p id="tx"></p><div class="tnav"><button id="tprev">← Back</button><span id="tn"></span><button id="tnext">Next →</button><button id="tskip">Skip</button></div></div></div>
+<dialog id="dlg"><div id="dbody"></div></dialog>
+<script>
+const $=id=>document.getElementById(id), rnd=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
+const S={eff:0,life:4,ren:40,cool:'closed',ind:true};
+const COOL={evap:1.8,closed:0.4,dry:0.1}, STEAM={evap:.7,closed:.2,dry:.04};
+const LABS={
+ openai:{n:'OpenAI (ChatGPT)',c:'#12A383',gw:4,on:true,v:2.8,eff:1,off:0,tm:1,mw:90,note:'Assumed: trains on rented cloud clusters, so its grid mix follows the host region.'},
+ google:{n:'Google (Gemini)',c:'#3B6FE0',gw:5,on:true,v:2.8,eff:.85,off:20,tm:.8,mw:70,note:'Assumed: custom chips and efficient buildings use less energy per answer, and it buys a lot of clean power.'},
+ anthropic:{n:'Anthropic (Claude)',c:'#C9803F',gw:2,on:true,v:2.5,eff:.95,off:5,tm:.7,mw:60,note:'Assumed: rents capacity from several cloud providers, so its footprint follows theirs.'},
+ meta:{n:'Meta (Llama)',c:'#7A4FD8',gw:3,on:true,v:2.4,eff:.95,off:15,tm:1.2,mw:100,note:'Assumed: owns its data centers and buys plenty of solar, trains very large models, then shares the weights.'},
+ open:{n:'Open source (local model)',c:'#8CB300',gw:1,on:true,v:1.2,max:2.778,eff:1.3,off:-5,tm:.00002,mw:.008,dry:true,camp:0,chips:5e6,kg:.0015,note:'Assumed: open-weight models run on laptops and gaming PCs that people already own, not in data centers. 1 GW here is about 5 million home GPUs at 200 W. No cooling towers or campus land, and power comes from ordinary home grids. Home chips are less efficient per answer, and there are millions of them. Size is capped at 600 billion parameters, which needs roughly 300 GB of memory: a maxed-out workstation or a few GPUs, far beyond a typical laptop (8 to 24 GB runs models of about 7 to 30 billion). Training here means a community fine-tune on a few GPUs; the base model was trained by a company.'},
+ cloud:{n:'Everyday cloud (AWS-style)',c:'#6C8EA4',ai:false,gw:6,on:false,v:0,eff:.9,off:10,tm:0,mw:0,note:'Assumed: not AI. This is the web hosting, storage, streaming and business software that runs in big cloud data centers, shown for scale. Switch it on to compare.'}};
+const K=Object.keys(LABS);
+const FR={
+ openai:{est:true,lo:3.301,hi:4,fq:'Frontier: GPT-5.x ~2–10T'},
+ google:{est:true,lo:3.477,hi:3.699,fq:'Frontier: Gemini 3.x ~3–5T'},
+ anthropic:{est:true,lo:3.301,hi:3.699,fq:'Frontier: Claude ~2–5T'},
+ meta:{pt:2.912,fq:'Frontier: Muse Spark Open 816B'},
+ open:{pt:null,fq:'Frontier: Kimi K3 2.8T'}};
+const cmp=(v,pt)=>{const r=10**(v-pt);return r>=1.15?r.toFixed(1)+'× bigger than':r<=.87?'about 1/'+Math.round(1/r)+' of':'about the same as';};
+const tk=k=>{const f=FR[k],mx=LABS[k].max||4;if(!f)return '';const fx=x=>`calc(8px + (100% - 16px) * ${(x/mx).toFixed(4)})`;
+  if(f.est)return `<i class="rg" style="left:${fx(f.lo)};width:calc((100% - 16px) * ${((Math.min(f.hi,mx)-f.lo)/mx).toFixed(4)})" title="Outside estimate range for today's frontier models"></i>`;
+  if(f.pt!=null&&f.pt<=mx)return `<i class="tk" style="left:${fx(f.pt)}" title="Today's published frontier size"></i>`;return '';};
+const TIERS=[{m:.5,u:.5,t:'Autocomplete and short answers'},{m:1.2,u:.7,t:'Basic voice assistant: timers and simple questions'},{m:2,u:.85,t:'Fluent chat and summaries'},{m:2.6,u:1,t:'Full conversations, coding help, long documents'},{m:3.2,u:1.25,t:'Understands images and video, reasons step by step'},{m:3.7,u:1.6,t:'Generates video and runs agentic tasks with tools'},{m:9,u:2.2,t:'Autonomous agents working for hours on research'}];
+const TASKS={
+ chat:{s:'chats',verb:'Answering',n:'1 billion chats',e:.3,ref:2.7,min:0,good:40,why:'Short answers are forgiving, so even fairly small models do well.',note:'Each chat uses about 0.3 Wh, like a 10-watt LED bulb for two minutes. Published 2025 estimates from AI companies for a typical text prompt range from about 0.2 to 0.4 Wh. Tiny alone, huge in aggregate, and it repeats every day.'},
+ docs:{s:'documents',verb:'Writing',n:'1 million documents',e:.003,ref:2.7,min:0,good:55,why:'Long documents need the model to keep structure and facts consistent over thousands of words, so mid-size models and up do best.',note:'A 2,000-word document is about 3,000 tokens of output, roughly ten chat replies, so about 3 Wh each at 500 billion parameters. This is scaled from the chat figure, so treat it as illustrative.'},
+ learn:{s:'learning packs',verb:'Creating',n:'1 million learning packs',e:.006,ref:2.7,min:0,good:68,why:'Learning material has to be accurate. Small models make more factual errors, so a person must check their lesson plans and answer keys. Bigger models need less checking.',note:'A pack is a lesson plan, worksheet and answer key, about twice the output of one document: roughly 6 Wh at 500 billion parameters. Illustrative scaling from the chat figure.'},
+ video:{s:'video',verb:'Generating',n:'1 million videos',e:.94,ref:3.2,min:3.2,good:80,why:'Video generation only appears in very large models.',note:'A short AI video clip can take close to 1 kWh (one 2025 estimate for a 5-second video was about 0.94 kWh), like running a microwave for an hour. Video is far hungrier than text.'}};
+const fit=(m,T)=>m.v<T.min?['b','Cannot']:m.q>=T.good?['g','Good fit']:m.q>=T.good-20?['m','Needs checking']:['b','Too weak'];
+const tier=v=>TIERS.findIndex(t=>v<t.m);
+const mult=L=>L.ai===false?1:10**(.3*(L.v-2.5))*TIERS[tier(L.v)].u;
+const pl=v=>{const p=10**v;return p>=1000?(p/1000).toFixed(p>=10000?0:1).replace('.0','')+' trillion':Math.round(p)+' billion';};
+const qual=v=>100/(1+Math.exp(-1.7*(v-1.3)));
+const sn=L=>L.dry?'Local open-source':L.n.replace(/ \(.*\)/,'');
+function renderModels(){
+  const k=models.map(m=>m.id).join();if(k===mlk)return;mlk=k;
+  $('mlist').innerHTML=models.length?models.map(m=>`<label class="mrow" style="--lc:${LABS[m.k].c}"><input type="checkbox" data-m="${m.id}" ${m.sel?'checked':''}><span><b>#${m.id} ${sn(LABS[m.k])} ${pl(m.v)}</b><small>Quality ${m.q}/100. ${TIERS[tier(m.v)].t}</small></span></label>`).join(''):'<p class="note">No models trained yet. Click Train a model on a lab to create one.</p>';
+}
+function qchart(){
+  const px=v=>34+v/4*316,py=p=>140-p/100*125;let q='';
+  for(let v=0;v<=4.001;v+=.1)q+=px(v)+','+py(qual(v))+' ';
+  const dots=models.map(m=>`<circle cx="${px(m.v)}" cy="${py(m.q)}" r="6" fill="${LABS[m.k].c}" stroke="#fff" stroke-width="1.5"><title>#${m.id} ${sn(LABS[m.k])} ${pl(m.v)}: quality ${m.q}/100</title></circle>`).join('');
+  const rings=K.filter(k=>LABS[k].ai!==false&&LABS[k].on).map(k=>`<circle cx="${px(LABS[k].v)}" cy="${py(qual(LABS[k].v))}" r="5" fill="none" stroke="${LABS[k].c}" stroke-width="2.5"><title>${LABS[k].n} slider: ${pl(LABS[k].v)}</title></circle>`).join('');
+  const xl=['1B','10B','100B','1T','10T'].map((t,i)=>`<text x="${px(i)}" y="156" font-size="9" text-anchor="middle" fill="#5A727A">${t}</text>`).join('');
+  const yl=[0,50,100].map(p=>`<line x1="34" x2="350" y1="${py(p)}" y2="${py(p)}" stroke="#C5D3D1"/><text x="30" y="${py(p)+3}" font-size="9" text-anchor="end" fill="#5A727A">${p}</text>`).join('');
+  const lx=px(LABS.open.max);
+  $('qchart').innerHTML=`<svg viewBox="0 0 360 172" style="width:100%;height:auto" role="img" aria-label="Quality rises with model size but flattens">${yl}${xl}<line x1="${lx}" x2="${lx}" y1="15" y2="140" stroke="#8CB300" stroke-dasharray="3 3"/><text x="${lx+4}" y="132" font-size="9" fill="#5A7A00">Home PC limit</text><polyline points="${q}" fill="none" stroke="#12303A" stroke-width="2.5"/>${rings}${dots}<text x="34" y="168" font-size="9" fill="#5A727A">Parameters (log scale)</text><text x="2" y="9" font-size="9" fill="#5A727A">Quality</text></svg>`;
+}
+const tot=()=>K.reduce((s,k)=>s+(LABS[k].on?LABS[k].gw:0),0);
+const ladder=()=>'<ul style="padding-left:18px;font-size:14px;margin:8px 0">'+TIERS.map((t,i)=>`<li><b>${pl(i?TIERS[i-1].m:0)}+</b> ${t.t} <span style="color:var(--mute)">(×${t.u} usage)</span></li>`).join('')+'</ul>';
+let runs=[], cur, mx, burst=0, lvl=.1, spike='', models=[], mid=0, mlk='-';
+const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+function calc(sc=1,noRuns=false){
+  const R={twh:0,co2:0,water:0,land:0,gpus:0,kt:0,gw:0,rw:0,by:{}};
+  for(const k of K){const L=LABS[k],gw=L.on?L.gw*sc:0,r=Math.min(1,Math.max(0,(S.ren+L.off)/100)),
+    twh=gw*8.76*.85*(1-S.eff/100)*L.eff*mult(L),inten=550*(1-r)+30*r,wl=(L.dry?0:COOL[S.cool])+(S.ind?2*(1-r):0),
+    o={gw,twh,inten,wl,r,co2:twh*inten/1000,water:twh*wl,land:gw*(L.camp??2)+(S.ind?twh*(r*3+(1-r)*.4):0),gpus:gw*(L.chips||5e5)/S.life,kt:gw*(L.chips||5e5)/S.life*(L.kg||.05)/1000};
+    R.by[k]=o;for(const f of['gw','twh','co2','water','land','gpus','kt'])R[f]+=o[f];R.rw+=twh*r;}
+  R.rGwh=0;R.rT=0;R.rMl=0;
+  if(!noRuns)for(const x of runs){const ks=(x.k?[x.k]:K.filter(j=>LABS[j].ai!==false)).filter(j=>LABS[j].on);
+    ks.forEach(j=>{const o=R.by[j],e=x.gwh/ks.length,t=e*o.inten,ml=e*o.wl;
+      o.twh+=e/1e3;o.co2+=t/1e6;o.water+=ml/1e3;R.twh+=e/1e3;R.co2+=t/1e6;R.water+=ml/1e3;R.rw+=e/1e3*o.r;R.rGwh+=e;R.rT+=t;R.rMl+=ml;});}
+  const rAvg=R.twh?R.rw/R.twh:S.ren/100;
+  R.inten=R.twh?R.co2*1000/R.twh:550*(1-rAvg)+30*rAvg;
+  R.wl=R.twh?R.water/R.twh:COOL[S.cool];
+  R.share=R.twh/4200*100;
+  R.up=1.5*R.share*(1+.5*(1-rAvg))*(1+R.share/10);
+  R.price=18*(1+R.up/100);
+  return R;
+}
+const eng=g=>g>=.1?fmt(g)+' GWh':g>=1e-4?fmt(g*1e3)+' MWh':fmt(g*1e6)+' kWh';
+const wat=m=>m>=.1?fmt(m)+' million L':m>=.001?fmt(m*1e3)+' thousand L':fmt(m*1e6)+' L';
+const co=t=>t>=.1?fmt(t)+' tonnes':t>=1e-4?fmt(t*1e3)+' kg':fmt(t*1e6)+' g';
+const pw=m=>m<1?Math.round(m*1e3)+' kW':Math.round(m)+' MW';
+function fmt(n){
+  if(n>=1e6)return (n/1e6).toFixed(1)+'M';
+  if(n>=100)return Math.round(n).toLocaleString('en-US');
+  if(n>=10)return n.toFixed(0);
+  return n.toFixed(1);
+}
+const q=(id,k)=>document.querySelector('#'+id+' [data-k='+k+']');
+const fr=(v,m)=>m?Math.min(100,v/m*100):0;
+function setCard(id,vals,bar,add){
+  for(const k in vals)q(id,k).textContent=vals[k];
+  if(bar!==undefined)q(id,'bar').style.width=bar+'%';
+  const a=q(id,'add');
+  if(a.textContent!==add){a.textContent=add;if(add){const p=a.parentElement;p.classList.remove('flash');void p.offsetWidth;p.classList.add('flash');}}
+}
+function update(){
+  const T=tot();cur=calc();mx=calc(100/(T||1));const c=cur;
+  $('o_eff').textContent=S.eff+'%';$('o_life').textContent=S.life+' yr';$('o_ren').textContent=S.ren+'%';
+  K.forEach(k=>{const L=LABS[k],o=c.by[k],$$=n=>document.querySelector('[data-'+n+'='+k+']');
+    $$('lg').textContent=L.on?L.gw+' GW · '+fmt(o.twh)+' TWh · '+fmt(o.co2)+' Mt CO₂':'Off. Switch on to add it.';
+    $('row_'+k).classList.toggle('off',!L.on);$$('on').checked=L.on;
+    const tb=$$('t');if(tb)tb.disabled=!L.on;
+    if(L.ai!==false){$$('pv').textContent=pl(L.v);$$('pb').textContent=pl(L.v).replace(' billion','B').replace(' trillion','T')+' params';$$('cap').textContent='Can do: '+TIERS[tier(L.v)].t+'. Quality about '+Math.round(qual(L.v))+'/100.'+(L.dry?' Needs about '+Math.round(10**L.v*.5)+' GB of memory (4-bit)'+(10**L.v*.5>24?', more than a typical PC has.':'.'):'');}});
+  renderModels();qchart();
+  const rows=[['Load','gw','GW'],['Power','twh','TWh'],['CO₂','co2','Mt'],['Water','water','billion L']];
+  $('stacks').innerHTML=rows.map(([n,f,u])=>`<div class="sr"><span>${n}</span><div class="sb">${K.map(k=>`<i style="width:${c[f]?c.by[k][f]/c[f]*100:0}%;background:${LABS[k].c}" title="${LABS[k].n}: ${fmt(c.by[k][f])} ${u}"></i>`).join('')}</div><b>${fmt(c[f])} ${u}</b></div>`).join('')
+   +'<div class="leg">'+K.map(k=>`<span><i style="background:${LABS[k].c}"></i>${LABS[k].n}</span>`).join('')+'</div>';
+  const gwh=c.rGwh,lt=c.rT,lml=c.rMl,c0=calc(1,true),good=runs.filter(r=>r.ok).length;
+  $('ledger').textContent=runs.length?runs.length+' runs so far: '+good+' useful, '+(runs.length-good)+' wasted.':'No runs yet. Try training a model for one of the labs.';
+  setCard('c_power',{twh:fmt(c.twh),share:c.share.toFixed(1),reactors:fmt(c.gw*(1-S.eff/100)),homes:fmt(c.twh*1e9/10800/1e6)+'M'},fr(c.twh,mx.twh),gwh?'Includes '+eng(gwh)+' from your '+runs.length+' runs, enough for '+fmt(gwh*1e6/10800)+' homes for a year':'');
+  const hi=mx.price,lo=18,pts=[];for(let g=0;g<=100;g+=5)pts.push((g*1.98+1)+','+(58-(calc(g/(T||1)).price-lo)/((hi-lo)||1)*52));
+  q('c_price','line').setAttribute('points',pts.join(' '));
+  q('c_price','dot').setAttribute('cx',T*1.98+1);q('c_price','dot').setAttribute('cy',58-(c.price-lo)/((hi-lo)||1)*52);
+  setCard('c_price',{price:c.price.toFixed(2),up:c.up.toFixed(2)},undefined,gwh?(c.price-c0.price<.0005?'Your runs add less than 0.001¢. Tiny next to the whole grid.':'Your runs add '+(c.price-c0.price).toFixed(3)+'¢ per kWh.'):'');
+  setCard('c_co2',{co2:fmt(c.co2),cars:fmt(c.co2/4.6)+'M',inten:Math.round(c.inten)},fr(c.co2,mx.co2),lt?'Includes '+co(lt)+' CO₂ from your runs':'');
+  setCard('c_water',{water:fmt(c.water),pools:fmt(c.water*400),wl:c.wl.toFixed(1)},fr(c.water,mx.water),lml?'Includes '+wat(lml)+' of water from your runs':'');
+  setCard('c_land',{land:fmt(c.land),parks:fmt(c.land/3.41)},fr(c.land,mx.land),'');
+  setCard('c_waste',{kt:fmt(c.kt),eiffel:fmt(c.kt/10.1),gpus:fmt(c.gpus/1e6)+'M'},fr(c.kt,mx.kt),'');
+  if(reduced)draw(0);
+}
+
+/* ---------- dialogs ---------- */
+const X={
+ labs:['Labs, model size and the cloud','Switch labs on and off to compare them one at a time, or press Solo to see just one. Each lab has its own load in gigawatts and its own model size. One GW is about one large nuclear reactor, or roughly 750,000 homes. The grey Everyday cloud row is ordinary computing, shown for scale. The Open source row models local models running on hardware people already own.','Energy = GW × 8,760 hours × 85% busy × efficiency × a model-size factor. Each lab also has its own clean-power share and training cost.','Press Solo on Open source, then Solo on Google, and compare the bars. Then switch on the cloud row.'],
+ use:['Everyday use','After a model is trained, it has to run every time someone uses it. This is called inference, and for popular models it quickly outweighs the one-off training cost. Here you run a task on the models you have trained and see how size changes the cost.','Per chat: about 0.3 Wh for a model of roughly 500 billion parameters. A document is about 3 Wh and a learning pack (lesson plan, worksheet, answer key) about 6 Wh, because they are longer. A short video is about 0.94 kWh at 1.6 trillion parameters. All are scaled by size^0.7, the lab efficiency factor and your efficiency slider. Smaller models cannot make video, and each task has a quality bar a model must clear to be a good fit. Each ticked model runs the whole task.','Train a small and a large model for the same lab, tick both, and run a billion chats.'],
+ qual:['Quality vs size','The solid line is a rough quality score. It rises quickly as models grow, then flattens: each tenfold jump in size buys less, while the energy for each answer keeps climbing. Dots are models you trained and rings are each lab slider. The green dashed line marks the largest model a home PC could run. Real quality depends on data and training as much as size, so models of the same size can differ a lot, and the 0 to 100 score is an invented index.','A simplified curve for building intuition: quality is a logistic curve centred at about 20 billion parameters.','Compare a dot at 10 billion with one at 1 trillion. How much better is it, and how much more energy does it use per answer?'],
+ params:['Model size (parameters)','Parameters are the adjustable numbers inside a model. More of them usually means more skills, but also more computing for every answer. As size grows, AI goes from autocomplete to voice, full conversations, video and agents that act on their own. The skill levels here are a simplified guide, since real ability also depends on data and training.','Bigger models cost more per answer: size factor = 10^(0.3 × (log size − 2.5)). More capable models also get used for heavier jobs like video and long agent runs, which multiplies demand. Training energy grows nearly in step with size.','Drag one lab from 10 billion to 10 trillion, watch its skills change, then check the CO₂ and water bars.'],
+ eff:['Efficiency gains','Better chips, smaller models and smarter software mean less energy per answer. But cheaper AI gets used more, so total demand can still climb. Economists call this the rebound effect.','Every lab\'s energy is multiplied by (1 − gain).','Set it to 40%, then add 20 GW of labs. Does the saving survive?'],
+ life:['Chip lifespan','AI chips are swapped out every few years when a faster generation arrives. A shorter life means more hardware scrapped each year, and more new chips manufactured (not counted here).','About 500,000 chips per GW, roughly 50 kg each including servers, divided by lifespan.','Drop it to 2 years and watch the waste card.'],
+ ren:['Clean energy share','The slice of electricity from wind, solar, hydro or nuclear. It sets the carbon in every kWh, and how much water power plants evaporate.','Fossil power: 550 g CO₂ per kWh. Clean: 30 g (lifecycle). Each lab shifts the share up or down by a few points to reflect how it buys power.','Press "Mostly clean" and watch carbon and water fall while power use stays the same.'],
+ cool:['Cooling method','Chips turn nearly all their power into heat. Evaporative towers shed it by evaporating water: cheap but thirsty, up to about 1.8 L per kWh. The fleet-wide average is much lower, about 0.4, because many sites use air or recirculating loops. Dry or immersion cooling uses almost none. Less water can mean a bit more electricity, which this model keeps fixed so you can isolate the water effect. Local models on home PCs use no cooling water at all.','Direct water: 1.8, 0.4 or 0.1 litres per kWh.','Switch to Evaporative towers and watch the reservoir and steam change.'],
+ ind:['Power plant impacts','Power plants use water too, mostly for steam and cooling, and need land for solar farms, gas plants and mines. Counting them reveals the hidden footprint behind the data center fence.','Adds about 2 L per kWh of non-clean power, plus 3 km² per TWh of clean generation or 0.4 km² of fossil.','Untick it and see how much of the water and land was never in the data center.'],
+ power:['Power','Total electricity the labs use in a year, plus any training runs you click. US data centers used about 176 TWh in 2023 (4.4% of US electricity), and Lawrence Berkeley National Lab projects 325 to 580 TWh by 2028, or about 6.7% to 12%. Only part of that is AI.','TWh = GW × 8.76 × 0.85 × (1 − efficiency) × lab factor, plus your runs. The US uses about 4,200 TWh a year.',null],
+ price:['Price of electricity','Evidence is mixed. In some regions new data center demand has already pushed up capacity prices and bills. But a Lawrence Berkeley study found that load growth over the past five years mostly spread fixed costs over more kWh and held average prices down, and that sudden spikes in demand are what cause sharp local increases. The US average home price is about 18¢ per kWh in 2026 (EIA).','This is a scenario, not a forecast: rise = 1.5 × AI share of US demand × a fossil-reliance factor × a bump as demand grows. It assumes new demand arrives faster than new supply. Real prices depend on region, regulation and who pays for new plants.',null],
+ water:['Water','Direct water cools the buildings. Indirect water is what power plants use to make the electricity. LBNL estimates US data centers used about 66 billion litres on site in 2023, around 0.4 litres per kWh across all of them. Evaporative towers can use several times more. Much of the water evaporates and does not return to the same watershed.','Billion litres = TWh × litres per kWh. Direct: 1.8, 0.4 or 0.1 L per kWh by cooling method. Indirect: about 2 L per kWh of non-clean power, a conservative figure. An Olympic pool holds about 2.5 million litres.',null],
+ land:['Land','Campuses, substations, and the solar farms, wind farms and plants that feed them. Solar needs lots of space per unit of energy, but the land can also keep other uses.','2 km² per GW of campus, plus generation land per TWh. Central Park is 3.41 km².',null],
+ waste:['Chip and server waste','Old AI chips and servers are scrapped faster than most electronics. Recycling them is hard because of mixed materials and secure-data rules.','Chips per GW × 50 kg ÷ lifespan. The Eiffel Tower weighs about 10,100 tonnes.',null]};
+const dlg=$('dlg');
+const live={power:()=>cur.twh.toFixed(0)+' TWh right now, '+cur.share.toFixed(1)+'% of US electricity.',price:()=>'Right now: '+cur.price.toFixed(1)+'¢ per kWh, up '+cur.up.toFixed(1)+'%.',co2:()=>'Right now: '+fmt(cur.co2)+' Mt at '+Math.round(cur.inten)+' g per kWh.',water:()=>'Right now: '+fmt(cur.water)+' billion litres at '+cur.wl.toFixed(1)+' L per kWh.',land:()=>'Right now: '+fmt(cur.land)+' km².',waste:()=>'Right now: '+fmt(cur.kt)+' kilotonnes a year.'};
+function open(html){$('dbody').innerHTML=html+'<div class="dact" data-keep><button class="main" data-c>Close</button></div>';if(!dlg.open)dlg.showModal();}
+function explain(key){
+  if(key.startsWith('lab_')){const L=LABS[key.slice(4)];
+    return open(`<h2>${L.n}</h2><p>${L.note}</p><p class="how">Energy per GW: ×${L.eff}. Clean-power share: ${L.off>=0?'+':''}${L.off} points. ${L.ai===false?'':'Training cost: ×'+L.tm+'. '}These are made-up numbers to show how differences could play out.</p>`);}
+  const e=X[key];
+  open(`<h2>${e[0]}</h2><p>${e[1]}</p><p class="how"><b>In this model:</b> ${e[2]}</p>${key==='params'?ladder():''}${live[key]?'<p><b>'+live[key]()+'</b></p>':''}${e[3]?'<p><b>Try this:</b> '+e[3]+'</p>':''}`);
+}
+
+/* ---------- runs ---------- */
+const OUT=[
+ {w:3,ok:1,h:'It worked',f:()=>`Benchmark scores rose about ${rnd(2,6)}%. This is the outcome everyone budgets for.`},
+ {w:2,h:'No improvement',f:()=>`Performance didn't improve. The loss curve flattened and nobody on the team knows why: the data, the learning rate, or plain bad luck. Want to run it again?`},
+ {w:1.5,h:'Run diverged',f:()=>`The loss spiked on day ${rnd(5,40)} and the run went off the rails. The team restarts from a checkpoint, and the energy already spent is gone.`},
+ {w:1.5,h:'Hardware failure',f:()=>`${rnd(40,900)} GPUs failed mid-run. The job resumed from a checkpoint and repeated about ${rnd(4,30)} hours of work.`},
+ {w:1,h:'Bad data',f:()=>`A check found ${rnd(3,9)}% of the training text was duplicated, so the model memorised instead of learning. Clean it up and go again.`},
+ {w:1,h:'Better scores, worse model',f:()=>`It beat the benchmark but feels worse in real use. Nobody can say why yet.`}];
+function pick(){let r=Math.random()*OUT.reduce((s,o)=>s+o.w,0);for(const o of OUT){if((r-=o.w)<0)return o;}return OUT[0];}
+const st=(l,v,s)=>`<div class="st"><small>${l}</small><b>${v}</b><span>${s}</span></div>`;
+function stats(gwh,t,ml,time){return `<div class="st4">${st('Electricity',eng(gwh),fmt(gwh*1e6/10800)+' homes for a year')}${time}${st('CO₂',co(t),fmt(t/4.6)+' cars for a year')}${st('Water',wat(ml),fmt(ml/2.5)+' Olympic pools')}</div>`;}
+function train(k,small){
+  const L=LABS[k],o=cur.by[k],mw=small?L.mw/6:L.mw,gwh=(small?1.5:50)*L.tm*10**(.9*(L.v-3))*(.85+Math.random()*.3);
+  const days=gwh*1000/(mw*24),t=gwh*o.inten,ml=gwh*o.wl,out=pick(),mv=small?Math.max(0,L.v-1.69):L.v;
+  let mdl=null;if(out.ok){mdl={id:++mid,k,v:mv,q:Math.max(1,Math.min(99,Math.round(qual(mv)+rnd(-4,3)))),sel:true};models.push(mdl);}
+  runs.push({k,gwh,ok:!!out.ok});burst=240;spike='Training now: +'+pw(mw)+' for '+(days<10?days.toFixed(1):Math.round(days))+' days';update();
+  const good=runs.filter(r=>r.ok).length;
+  open(`<h2>${small?'Small':'Full-scale'} training run: ${L.n}</h2><p class="how">Model size: ${pl(mv)} parameters. At this size it can: ${TIERS[tier(mv)].t.toLowerCase()}.</p>`+stats(gwh,t,ml,st('Time',(days<10?days.toFixed(1):Math.round(days))+' days','on a '+pw(mw)+(L.dry?' home GPU rig':' cluster')))
+   +`<div class="out ${out.ok?'ok':'bad'}"><b>${out.h}</b>${out.f()}</div>`
+   +`<p>${mdl?'<b>New model ready:</b> '+sn(L)+' '+pl(mdl.v)+', quality about '+mdl.q+'/100. It now appears under Everyday use.':'<b>No usable model came out of this run.</b>'}</p>`
+   +`<p>${out.ok?'Good run. It does not count the failed experiments that came before it.':'Same electricity, same water, nothing to show for it. Labs often run many experiments for each model that ships.'}</p>`
+   +`<p>While it runs, this draws ${pw(mw)} nonstop, about ${fmt(mw*1000/1.2)} homes of power. It is now counted in the yearly totals, but at ${(gwh/1e3/4200*100).toFixed(4)}% of US yearly electricity the price barely moves. Many runs plus always-on serving is what moves it.</p>`
+   +`<p class="how">Labs rarely publish training energy. Published estimates: about 1.3 GWh for GPT-3 and roughly 50 GWh for GPT-4-class runs. Runs so far: ${runs.length}. Useful: ${good}. ${L.note}</p>`
+   +`<div class="dact"><button class="main" data-again="${k}">Run again</button><button data-small="${k}">Try a smaller run</button><button data-c>Close</button></div>`);
+}
+function infer(type){
+  if(!models.length)return open('<h2>No model trained</h2><p>Everyday use runs on models you have trained. Click Train a model on one of the labs first. Only successful runs produce a usable model, so you may need a few tries.</p>');
+  const sel=models.filter(m=>m.sel);
+  if(!sel.length)return open('<h2>No model selected</h2><p>Tick at least one trained model in the Everyday use list.</p>');
+  const T=TASKS[type];
+  let rows='',E=0,CO=0,M=0,used=0,best=null,low=null,weak=0;
+  sel.forEach(m=>{const L=LABS[m.k],o=cur.by[m.k],nm='#'+m.id+' '+sn(L)+' '+pl(m.v),f=fit(m,T);
+    if(m.v<T.min){rows+=`<tr><td>${nm}</td><td colspan="5">Cannot do this. It needs about ${pl(T.min)} parameters.</td></tr>`;return;}
+    const e=T.e*10**(.7*(m.v-T.ref))*L.eff*(1-S.eff/100),t=e*o.inten,ml=e*o.wl;
+    E+=e;CO+=t;M+=ml;used++;runs.push({k:m.k,gwh:e,ok:true});if(f[0]==='b')weak++;
+    if(!best||m.q>best.q)best={q:m.q,nm};if(!low||e<low.e)low={e,nm};
+    rows+=`<tr><td>${nm}</td><td>${m.q}/100</td><td><span class="ft ${f[0]}">${f[1]}</span></td><td>${eng(e)}</td><td>${co(t)}</td><td>${wat(ml)}</td></tr>`;});
+  if(used>1)rows+=`<tr><td><b>Total</b></td><td></td><td></td><td><b>${eng(E)}</b></td><td><b>${co(CO)}</b></td><td><b>${wat(M)}</b></td></tr>`;
+  if(used){burst=240;spike=T.verb+' '+T.n+' on '+used+(used>1?' models':' model');}
+  update();
+  open(`<h2>${T.verb} ${T.n}</h2><table class="tb"><tr><th>Model</th><th>Quality</th><th>Fit</th><th>Electricity</th><th>CO₂</th><th>Water</th></tr>${rows}</table>`
+   +`<p class="how"><b>Fit:</b> this task needs a quality score of about ${T.good}/100 or more to work well. ${T.why}</p>`
+   +(used>1?`<p><b>Best quality:</b> ${best.nm}. <b>Lowest energy:</b> ${low.nm}. Bigger usually scores higher but costs much more per answer.</p>`:'')
+   +(weak?`<p>${weak===1?'One model is':weak+' models are'} below what this task needs. It is cheaper, but you would spend the saving on fixing its mistakes.</p>`:'')
+   +`<p>${T.note}</p>`
+   +`<p class="how">Energy per answer scales with model size (roughly size^0.7), each lab's efficiency and your efficiency slider. Each ticked model runs the whole task, so you can compare them. Results are added to the yearly totals.</p>`);
+}
+function lab(){
+  $('labs').innerHTML=K.map(k=>{const L=LABS[k],ai=L.ai!==false;return `<div class="lab-row" id="row_${k}" style="--lc:${L.c}"><div class="lh"><label class="sw"><input type="checkbox" data-on="${k}"><span class="nm">${L.n}</span>${ai?`<span class="pb" data-pb="${k}"></span><span class="fq">${FR[k].fq}</span>`:''}</label><button class="i" data-x="lab_${k}" aria-label="About ${L.n}">?</button></div><div class="lg" data-lg="${k}"></div>${ai?`<div class="pz"><span>Model size<button class="i" data-x="params" aria-label="About model size">?</button></span><b data-pv="${k}"></b></div><div class="rs"><input type="range" min="0" max="${L.max||4}" step="${L.max?'any':'.1'}" value="${L.v}" data-v="${k}" aria-label="${L.n} model size">${tk(k)}</div><div class="cap" data-cap="${k}"></div>`:'<div class="cap">For scale. Not AI: websites, storage and streaming.</div>'}<div class="lb"><button data-d="${k}" aria-label="Remove 5 GW from ${L.n}">−5</button><button data-p="${k}">+ Add 5 GW</button>${ai?`<button class="tr" data-t="${k}">Train a model</button>`:''}<button data-s="${k}">Solo</button></div></div>`;}).join('');
+}
+
+/* ---------- scene ---------- */
+const cv=$('scene'),g=cv.getContext('2d');cv.width=2000;cv.height=680;
+const P=[],hill=x=>235+Math.sin(x/130)*18+Math.sin(x/47)*5;
+function spawn(rate,o){for(let n=rate;n>0;n--)if(Math.random()<Math.min(1,n)&&P.length<520)P.push(Object.assign({l:0},o()));}
+function draw(t){
+  const c=cur;g.setTransform(2,0,0,2,0,0);g.clearRect(0,0,1000,340);
+  const sk=g.createLinearGradient(0,0,0,300);sk.addColorStop(0,'#CBDDE4');sk.addColorStop(1,'#EEF4F1');
+  g.fillStyle=sk;g.fillRect(0,0,1000,340);
+  g.fillStyle='#BCD1BF';g.beginPath();g.moveTo(0,290);for(let x=0;x<=1000;x+=20)g.lineTo(x,hill(x));g.lineTo(1000,290);g.fill();
+  const nt=Math.round(S.ren/100*10);g.strokeStyle='#F7FAF9';g.lineWidth=2.5;g.lineCap='round';
+  for(let i=0;i<nt;i++){const x=60+i*92,y=hill(x),a=t/500+i;g.beginPath();g.moveTo(x,y);g.lineTo(x,y-54);
+    for(let b=0;b<3;b++){const q=a+b*2.094;g.moveTo(x,y-54);g.lineTo(x+Math.cos(q)*22,y-54+Math.sin(q)*22);}g.stroke();}
+  g.fillStyle='rgba(90,90,85,'+Math.min(.32,c.co2/500)+')';g.fillRect(0,0,1000,300);
+  g.fillStyle='#86A862';g.fillRect(0,290,1000,50);
+  g.strokeStyle='#5A727A';g.lineWidth=1.2;
+  [120,400,680].forEach(x=>{g.beginPath();g.moveTo(x,74);g.lineTo(x,290);g.stroke();});
+  g.beginPath();g.moveTo(10,70);g.quadraticCurveTo(350,90,700,70);g.stroke();
+  const np=3+Math.round(c.gw/8);
+  for(let k=0;k<np;k++){const p=1-(((t/(2600/(.4+c.gw/35)))+k/np)%1),x=10+p*690;
+    g.fillStyle='#E0990F';g.beginPath();g.arc(x,70+Math.sin(p*Math.PI)*10,3.2,0,7);g.fill();}
+  const nb=Math.max(1,Math.min(23,Math.round(c.gw/4.4)));
+  for(let i=0;i<nb;i++){const x=30+i*27,h=30+((i*37)%5)*9+(c.gw>40?12:0);
+    let f=(i+.5)/nb*c.gw,col='#888';for(const k of K){if((f-=LABS[k].on?LABS[k].gw:0)<=0){col=LABS[k].c;break;}}
+    g.fillStyle='#2E4852';g.fillRect(x,290-h,24,h);g.fillStyle=col;g.fillRect(x,290-h,24,6);
+    for(let r=0;r<Math.floor((h-12)/12);r++)for(let cc=0;cc<3;cc++){
+      const on=burst>0||Math.sin(t/400+i*7+r*3+cc*5)>-.3;g.fillStyle=on?'#F2B83B':'#4B6670';g.fillRect(x+3+cc*7,290-h+11+r*12,4,6);}}
+  g.fillStyle='#6C7A82';g.fillRect(655,262,70,28);g.fillRect(668,228,13,36);g.fillRect(694,228,13,36);
+  g.fillStyle='#9AA8AD';g.beginPath();g.moveTo(738,290);g.lineTo(798,290);g.lineTo(786,230);g.lineTo(750,230);g.fill();
+  const tgt=.08+.92*Math.min(1,Math.sqrt(c.water/1500));lvl+=(tgt-lvl)*.05;
+  g.fillStyle='#E6EEF0';g.fillRect(820,244,150,46);g.fillStyle='#2C86C9';g.fillRect(820,290-46*lvl,150,46*lvl);
+  g.strokeStyle='#12303A';g.lineWidth=2;g.strokeRect(820,244,150,46);
+  if(burst>0&&spike&&!reduced){g.fillStyle='#12303A';g.font='600 15px "Bricolage Grotesque",sans-serif';g.fillText(spike,30,36);}
+  if(!reduced){const b=burst>0?3:1;if(burst>0)burst--;
+    spawn((.05+c.co2/120)*b,()=>({k:0,x:668+Math.random()*40,y:226,vx:.3+Math.random()*.25,vy:-.55-Math.random()*.3,r:3}));
+    spawn(STEAM[S.cool]*(.3+c.gw/40)*b,()=>({k:1,x:752+Math.random()*32,y:230,vx:.1+Math.random()*.2,vy:-.6-Math.random()*.3,r:4}));
+    if(S.cool!=='dry')spawn(c.water/900*b,()=>({k:2,x:760+Math.random()*20,y:236,vx:.9+Math.random()*.4,vy:-.2,r:2}));}
+  for(let i=P.length-1;i>=0;i--){const p=P[i];p.x+=p.vx;p.y+=p.vy;p.l++;
+    if(p.k===2){p.vy+=.06;if(p.y>=290-46*lvl&&p.x>820){P.splice(i,1);continue;}}else p.r+=.05;
+    if(p.l>190||p.y>300){P.splice(i,1);continue;}
+    const a=1-p.l/190;g.fillStyle=p.k===0?'rgba(70,78,86,'+a*.5+')':p.k===1?'rgba(255,255,255,'+a*.85+')':'rgba(44,134,201,.9)';
+    g.beginPath();g.arc(p.x,p.y,p.r,0,7);g.fill();}
+}
+function loop(t){draw(t);requestAnimationFrame(loop);}
+
+/* ---------- wiring ---------- */
+['eff','life','ren'].forEach(k=>$(k).addEventListener('input',e=>{S[k]=+e.target.value;update();}));
+document.querySelectorAll('[data-ren]').forEach(b=>b.onclick=()=>{S.ren=+b.dataset.ren;$('ren').value=S.ren;update();});
+document.querySelectorAll('[name=cool]').forEach(r=>r.onchange=()=>{S.cool=r.value;update();});
+$('ind').onchange=e=>{S.ind=e.target.checked;update();};
+$('reset').onclick=()=>{runs=[];models=[];update();};
+lab();
+$('labs').addEventListener('input',e=>{const k=e.target.dataset.v;if(k){LABS[k].v=+e.target.value;update();}});
+$('labs').addEventListener('change',e=>{const k=e.target.dataset.on;if(k){LABS[k].on=e.target.checked;update();}});
+$('mlist').addEventListener('change',e=>{const m=models.find(x=>x.id==e.target.dataset.m);if(m)m.sel=e.target.checked;});
+document.addEventListener('click',e=>{
+  const d=e.target.closest('button,[data-x]');if(!d)return;const D=d.dataset;
+  if(D.c!==undefined)dlg.close();
+  else if(D.x)explain(D.x);
+  else if(D.p){if(tot()<100){LABS[D.p].gw+=5;LABS[D.p].on=true;update();}}
+  else if(D.d){LABS[D.d].gw=Math.max(0,LABS[D.d].gw-5);update();}
+  else if(D.s){K.forEach(j=>LABS[j].on=j===D.s);update();}
+  else if(D.t)train(D.t,false);
+  else if(D.again)train(D.again,false);
+  else if(D.small)train(D.small,true);
+  else if(D.r)infer(D.r);
+});
+document.querySelectorAll('.card').forEach(c=>c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();explain(c.dataset.x);}}));
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close();});
+
+/* ---------- walkthrough ---------- */
+const STEPS=[
+ {s:'.scene',t:'Welcome',x:'This picture is a live model of what AI costs. Data centers are colored by lab, the power plant puffs carbon, the tower steams, and the reservoir fills with the water used. It reacts to everything you change.'},
+ {s:'#row_openai',t:'Add and compare labs',x:'Each lab has its own load in gigawatts. Tick the box to switch it on or off, press Solo to see it alone, or resize it with −5 and +5. The ? explains its assumptions. The grey cloud row at the bottom of the list is everyday computing, shown for scale.'},
+ {s:'#row_openai input[type=range]',t:'Model size',x:'Drag to change the number of parameters. Small models handle autocomplete and basic voice. Bigger ones hold full conversations, understand video and run as agents. Each step up costs more energy. The badge by the lab name shows its current size, and the red marker or bar shows where the current frontier models sit.'},
+ {s:'#row_openai .tr',t:'Train a model',x:'Click to run a training job. You will see the electricity, time, CO₂ and water it uses, plus a random outcome. Many runs fail or do not improve, and the energy is spent anyway. A successful run creates a model that appears under Everyday use.'},
+ {s:'.who',t:'Who adds what',x:'These bars split load, power, CO₂ and water by lab. Compare them: equal load does not mean equal impact.'},
+ {s:'#c_power',t:'Power',x:'Electricity used per year, as a share of all US electricity and in nuclear reactors. Your training runs are included.'},
+ {s:'#c_price',t:'Price of electricity',x:'More demand can raise prices if supply does not keep up. The curve shows price against total load, and the dot is where you are now. Treat it as a scenario, not a forecast.'},
+ {s:'#c_co2',t:'Carbon',x:'CO₂ depends on how much power is used and how clean the grid is. Try the clean energy slider further down.'},
+ {s:'#c_water',t:'Water',x:'Cooling water at the data center plus water used by power plants. The cooling method changes this a lot.'},
+ {s:'#c_land',t:'Land',x:'Campuses plus the solar farms and plants that feed them.'},
+ {s:'#c_waste',t:'Chip and server waste',x:'Old chips and servers scrapped each year. A shorter chip lifespan means more waste.'},
+ {s:'#tunePanel',t:'Tune the world',x:'Change AI efficiency, chip lifespan, how clean the grid is and how data centers are cooled. Watch the scene and every card respond.'},
+ {s:'#usePanel',t:'Everyday use',x:'Models you train appear here. Tick the ones you want, then run chats, documents, learning packs or video on them. The numbers change with each model size. With no trained model it tells you to train one first.'},
+ {s:'#qualPanel',t:'Quality vs size',x:'Bigger models score higher, but with diminishing returns. Dots are your trained models and rings are each lab slider.'},
+ {s:null,t:'Go deeper',x:'Click any card or any ? button to see how each number is calculated, plus something to try. All numbers are illustrative estimates, and the per-lab differences are assumptions.'}];
+let ti=-1;
+function go(i){
+  ti=i;const st=STEPS[i],el=st.s?document.querySelector(st.s):null,sp=$('spot'),tip=$('tip');
+  $('tour').hidden=false;
+  $('tt').textContent=st.t;$('tx').textContent=st.x;$('tn').textContent=(i+1)+' / '+STEPS.length;
+  $('tprev').disabled=!i;$('tnext').textContent=i===STEPS.length-1?'Done':'Next →';
+  if(el){const r0=el.getBoundingClientRect();scrollTo(0,r0.height<innerHeight-330?r0.top+scrollY-80:r0.top+scrollY-20);
+    const r=el.getBoundingClientRect();
+    Object.assign(sp.style,{left:r.left-8+'px',top:r.top-8+'px',width:r.width+16+'px',height:r.height+16+'px'});
+    tip.classList.toggle('top',r.bottom>innerHeight-tip.offsetHeight-24&&r.top>tip.offsetHeight+24);}
+  else{Object.assign(sp.style,{left:innerWidth/2+'px',top:innerHeight/2+'px',width:'0px',height:'0px'});tip.classList.remove('top');}
+  $('tnext').focus();
+}
+function endTour(){ti=-1;$('tour').hidden=true;$('tourBtn').focus();}
+$('tourBtn').onclick=()=>go(0);
+$('tnext').onclick=()=>ti>=STEPS.length-1?endTour():go(ti+1);
+$('tprev').onclick=()=>ti>0&&go(ti-1);
+$('tskip').onclick=endTour;
+document.addEventListener('keydown',e=>{if(ti<0)return;
+  if(e.key==='ArrowRight'){e.preventDefault();$('tnext').click();}
+  else if(e.key==='ArrowLeft'){e.preventDefault();$('tprev').click();}
+  else if(e.key==='Escape')endTour();});
+addEventListener('resize',()=>{if(ti>=0)go(ti);});
+update();reduced?draw(0):requestAnimationFrame(loop);
+</script>
+</body>
+</html>
